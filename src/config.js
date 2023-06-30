@@ -2,30 +2,25 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-
 const fetch = require("node-fetch");
 
 // const axios = require("axios");
 const {
-  
   createApiBuilderFromCtpClient,
 } = require("@commercetools/platform-sdk");
 
-const {
-  ClientBuilder,
-
-} = require("@commercetools/sdk-client-v2");
+const { ClientBuilder } = require("@commercetools/sdk-client-v2");
 
 const projectKey = process.env.CTP_PROJECT_KEY;
 // const scopes = ['{scope}'];
 
 // Configure authMiddlewareOptions
 const authMiddlewareOptions = {
-  host: "https://auth.europe-west1.gcp.commercetools.com",
-  projectKey: "project-commercetools",
+  host: process.env.CTP_AUTH_URL,
+  projectKey: process.env.CTP_PROJECT_KEY,
   credentials: {
-    clientId: "xMIYaNPO9aJhIHETqgqH7kgl",
-    clientSecret: "fjL2hpzGuUsdbo2Vz9qM74nMO9zaK8L4",
+    clientId: process.env.CTP_CLIENT_ID,
+    clientSecret: process.env.CTP_CLIENT_SECRET,
   },
   //   scopes,
   fetch,
@@ -33,14 +28,14 @@ const authMiddlewareOptions = {
 
 // Configure httpMiddlewareOptions
 const httpMiddlewareOptions = {
-  host: "https://api.europe-west1.gcp.commercetools.com",
+  host: process.env.CTP_API_URL,
   fetch,
 };
 
 // Export the ClientBuilder
 // export
 const ctpClient = new ClientBuilder()
-  .withProjectKey(projectKey) // .withProjectKey() is not required if the projectKey is included in authMiddlewareOptions
+  .withProjectKey(process.env.CTP_PROJECT_KEY) // .withProjectKey() is not required if the projectKey is included in authMiddlewareOptions
   .withClientCredentialsFlow(authMiddlewareOptions)
   .withHttpMiddleware(httpMiddlewareOptions)
   // .withLoggerMiddleware() // Include middleware for logging
@@ -48,7 +43,7 @@ const ctpClient = new ClientBuilder()
 
 // Create apiRoot from the imported ClientBuilder and include your Project key
 const apiRoot = createApiBuilderFromCtpClient(ctpClient).withProjectKey({
-  projectKey: "project-commercetools",
+  projectKey: process.env.CTP_PROJECT_KEY,
 });
 
 // Example call to return Project information

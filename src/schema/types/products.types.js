@@ -1,5 +1,7 @@
 const products = `#graphql
 
+scalar JSON
+
 type product{
     id: ID
     name: locale
@@ -7,6 +9,8 @@ type product{
     slug: locale
     masterVariant: masterVariant
 }
+
+
 
 type locale{
     en: String 
@@ -17,6 +21,20 @@ type masterVariant{
     sku: String
     prices: [ price ]
     images: [ image ]
+    attributes: [attributeValue]
+}
+
+
+
+type attributeValue {
+    name: String
+    value: JSON
+}
+
+
+type value1{
+    key: String
+    label: String
 }
 
 type price{
@@ -26,6 +44,7 @@ type price{
 type priceValue {
     currencyCode: String
     centAmount: Int
+    fractionDigits: Int
 }
 
 type image{
@@ -35,7 +54,8 @@ type image{
 }
 
 type Query {
-products(page: Int): [product!]
+    products(page: Int): [product!]
+    product(id: ID) : product
 }
 
 `;
