@@ -53,9 +53,15 @@ type image{
     label: String
 }
 
+type suggestions {
+
+    text: String
+}
+
 type Query {
-    products(page: Int): [product!]
+    products(searched: String ,page: Int): [product!]
     product(id: ID) : product
+    suggestions(keyword: String): [suggestions]
 }
 
 `;

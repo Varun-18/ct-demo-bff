@@ -1,23 +1,30 @@
-const apiRoot = require("../../config");
-const { v4: uuidv4 } = require("uuid");
+const {
+  getProductsService,
+  getProductsByKeyword,
+  getProducstById,
+} = require("../../services/products.service");
+
+const { getSuggestions } = require("../../services/suggestion.service");
+
+
+/**
+ * Resolves the Queries related to fetching the products
+ */
 
 const productsQueryResolvers = {
   Query: {
     products: async (parent, args) => {
       try {
-        const { page } = args;
-        const { body } = await apiRoot
-          .productProjections()
-          .get({ queryArgs: { offset: page } })
-          .execute();
+        const { searched, page } = args;
+        console.log(searched);
+        if (!searched) {
+          const data = await getProductsService(page);
 
-        body.results.map((item) => {
-          item.masterVariant.id = uuidv4();
-          return item;
-        });
-
-        // console.log(, "***  FROM GQL ***");
-        return body.results;
+          return data.results;
+        } else {
+          const data = await getProductsByKeyword(searched, page);
+          return data.results;
+        }
       } catch (error) {
         console.log(error, "from resolver");
       }
@@ -25,19 +32,22 @@ const productsQueryResolvers = {
     product: async (parent, args) => {
       try {
         const { id } = args;
-        console.log(id, "*** ID ***");
-        const { body } = await apiRoot
-          .productProjections()
-          .withId({ ID: id })
-          .get()
-          .execute();
-        console.log(body);
-
-        body.masterVariant.id = uuidv4();
-
-        return body;
+        const data = await getProducstById(id);
+        return data;
       } catch (error) {
         console.log(error, "from get product by id");
+      }
+    },
+
+    suggestions: async (parent, args) => {
+      try {
+        const { keyword } = args;
+        console.log(keyword);
+
+        const data = await getSuggestions(keyword);
+        return data;
+      } catch (error) {
+        console.log(error, "from the *** suggestions ***");
       }
     },
   },
