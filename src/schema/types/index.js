@@ -1,3 +1,5 @@
 const products = require("./products.types");
+const  user = require("./user.types")
 
-module.exports = [products];
+
+module.exports = [products, user];

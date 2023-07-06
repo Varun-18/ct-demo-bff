@@ -1,3 +1,4 @@
 const { productsQueryResolvers } = require("./products.resolver");
+const {userResolver} = require("./user.resolver")
 
-module.exports.resolvers = { ...productsQueryResolvers };
+module.exports.resolvers = { ...productsQueryResolvers,...userResolver };

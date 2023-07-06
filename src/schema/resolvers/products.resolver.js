@@ -16,7 +16,7 @@ const productsQueryResolvers = {
     products: async (parent, args) => {
       try {
         const { searched, page } = args;
-        console.log(searched);
+        console.log(searched, "*** from products ***");
         if (!searched) {
           const data = await getProductsService(page);
 
@@ -42,7 +42,7 @@ const productsQueryResolvers = {
     suggestions: async (parent, args) => {
       try {
         const { keyword } = args;
-        console.log(keyword);
+        console.log(keyword,"*** suggestion ***");
 
         const data = await getSuggestions(keyword);
         return data;
