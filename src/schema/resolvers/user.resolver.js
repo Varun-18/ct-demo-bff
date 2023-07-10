@@ -92,7 +92,7 @@ const userResolver = {
             disableRefreshToken: false,
           }
         );
-        res.cookie("authToken", access_token, { httpOnly: true });
+        res.cookie("authToken", access_token, { httpOnly: true, sameSite:"None" });
         return { email, phone: phone_number };
       } catch (error) {
         console.log(error);
