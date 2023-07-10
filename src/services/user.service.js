@@ -11,13 +11,7 @@ const apiRoot = require("../config");
 const verifyUserService = async (token) => {
   try {
     const { email, phone_number } = await firebase.auth().verifyIdToken(token);
-    if (!email) {
-      const data = await firebase.auth().getUserByPhoneNumber(phone_number);
-      console.log(data, "*** data ***");
-      return data;
-    } else {
-      return { email, phone_number };
-    }
+    return { email, phone_number };
   } catch (error) {
     console.log(error, "user token verification service");
   }
@@ -25,6 +19,8 @@ const verifyUserService = async (token) => {
 
 /**
  * This service checks weather the user already exists or not
+ * and if the user does not exist then firebase directly sends an error
+ * so we need to wirte further logic in the catch block
  * @param {String} email The email of the user
  * @param {String} phone The phone number of the user
  * @return checks the user is already exists or not

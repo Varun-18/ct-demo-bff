@@ -13,6 +13,7 @@ const { ClientBuilder } = require("@commercetools/sdk-client-v2");
 
 const projectKey = process.env.CTP_PROJECT_KEY;
 // const scopes = ['{scope}'];
+const scopes = [`${process.env.CTP_SCOPES}`];
 
 // Configure authMiddlewareOptions
 const authMiddlewareOptions = {
@@ -22,13 +23,14 @@ const authMiddlewareOptions = {
     clientId: process.env.CTP_CLIENT_ID,
     clientSecret: process.env.CTP_CLIENT_SECRET,
   },
-  //   scopes,
+  scopes,
   fetch,
 };
 
 // Configure httpMiddlewareOptions
 const httpMiddlewareOptions = {
   host: process.env.CTP_API_URL,
+  scopes,
   fetch,
 };
 

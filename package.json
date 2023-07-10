@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/server": "^4.7.5",
     "@commercetools/platform-sdk": "^4.10.0",
+    "@commercetools/sdk-auth": "^4.0.1",
     "@commercetools/sdk-client-v2": "^2.2.0",
     "axios": "^1.4.0",
     "cookie": "^0.5.0",

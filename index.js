@@ -16,19 +16,6 @@ const bodyParser = require("body-parser");
     resolvers,
   });
 
-  // const startServer = async () => {
-  //   const { url } = await startStandaloneServer(server, {
-  //     listen: { port: 5000 },
-  //   });
-  //   console.log("🚀 The server is running at port ", url);
-  // };
-
-  // startServer();
-
-  /**
-   * Experimental apollo server
-   */
-
   // Required logic for integrating with Express
   const app = express();
   // Our httpServer handles incoming requests to our Express app.
@@ -49,7 +36,11 @@ const bodyParser = require("body-parser");
     // expressMiddleware accepts the same arguments:
     // an Apollo Server instance and optional configuration options
     expressMiddleware(server, {
-      context: async ({ req, res }) => ({ req, res }),
+      context: async ({ req, res }) => ({
+        token: req.headers.cookie,
+        req,
+        res,
+      }),
     })
   );
 

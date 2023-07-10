@@ -8,18 +8,22 @@ const { getSuggestions } = require("../../services/suggestion.service");
 const cookie = require("cookie");
 
 /**
- * Resolves the Queries related to fetching the products
+ * Resolves the Queries related to fetching the products and suggestions
  */
 
 const productsQueryResolvers = {
   Query: {
-    products: async (parent, args, { res }) => {
+    /**
+     *This is the resolver that resolves the products queries
+     * @param {*} args gives the page number and any keywords that are searched for
+     * @returns {Array} array of products
+     */
+
+    products: async (parent, args) => {
       try {
         const { searched, page } = args;
-        console.log(searched, "*** from products ***");
         if (!searched) {
           const data = await getProductsService(page);
-          res.cookie("authToken", "varun", { httpOnly: true });
           return data.results;
         } else {
           const data = await getProductsByKeyword(searched, page);
@@ -29,6 +33,13 @@ const productsQueryResolvers = {
         console.log(error, "from resolver");
       }
     },
+
+    /**
+     * This resolver gives details of a particular product
+     * @param {*} args contains the id of the products whose deatils are requested
+     * @returns {object} product object
+     */
+
     product: async (parent, args) => {
       try {
         const { id } = args;
@@ -38,6 +49,12 @@ const productsQueryResolvers = {
         console.log(error, "from get product by id");
       }
     },
+
+    /**
+     * This is the resolver that is used to provude suggestions to the users
+     * @param {*} args contains the letters typed in the search bar
+     * @returns {Array} array of suggestions
+     */
 
     suggestions: async (parent, args) => {
       try {
