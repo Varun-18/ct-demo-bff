@@ -5,7 +5,7 @@ const {
 } = require("../../services/products.service");
 
 const { getSuggestions } = require("../../services/suggestion.service");
-
+const cookie = require("cookie");
 
 /**
  * Resolves the Queries related to fetching the products
@@ -13,13 +13,13 @@ const { getSuggestions } = require("../../services/suggestion.service");
 
 const productsQueryResolvers = {
   Query: {
-    products: async (parent, args) => {
+    products: async (parent, args, { res }) => {
       try {
         const { searched, page } = args;
         console.log(searched, "*** from products ***");
         if (!searched) {
           const data = await getProductsService(page);
-
+          res.cookie("authToken", "varun", { httpOnly: true });
           return data.results;
         } else {
           const data = await getProductsByKeyword(searched, page);
@@ -42,7 +42,7 @@ const productsQueryResolvers = {
     suggestions: async (parent, args) => {
       try {
         const { keyword } = args;
-        console.log(keyword,"*** suggestion ***");
+        console.log(keyword, "*** suggestion ***");
 
         const data = await getSuggestions(keyword);
         return data;

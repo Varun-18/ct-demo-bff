@@ -24,20 +24,18 @@ const userResolver = {
           stsTokenManager.accessToken
         );
         const final = await createUserOnCT(email, phone_number);
-        res.setHeader("Set-Cookie", "myCookie=varun; Max-Age=3600; Path=/");
         return final;
       } catch (error) {
         console.log(error, "from add User mutaion ");
       }
     },
-    loginUser: async (parent, args, context) => {
+    loginUser: async (parent, args, { res }) => {
       try {
         const { token } = args.data;
         const { email, phone_number } = await verifyUserService(token);
         console.log(email, phone_number, "from resolver of login");
-        // res.cookie("token", `123123123`);
-        const { setCustomCookie } = context.res;
-        setCustomCookie("demoCookie", "varun123");
+        res.cookie("token", `varun login token`, { httpOnly: true });
+        console.log("after cookie");
         return { email, phone: phone_number };
       } catch (error) {
         console.log(error);

@@ -10,9 +10,14 @@ const apiRoot = require("../config");
 
 const verifyUserService = async (token) => {
   try {
-    const result = await firebase.auth().verifyIdToken(token);
-    console.log(result);
-    return result;
+    const { email, phone_number } = await firebase.auth().verifyIdToken(token);
+    if (!email) {
+      const data = await firebase.auth().getUserByPhoneNumber(phone_number);
+      console.log(data, "*** data ***");
+      return data;
+    } else {
+      return { email, phone_number };
+    }
   } catch (error) {
     console.log(error, "user token verification service");
   }
@@ -27,10 +32,23 @@ const verifyUserService = async (token) => {
 
 const checkExistingService = async (email, phone) => {
   try {
+    if (!email) {
+      console.log(email, "no email");
+      throw { phone };
+    }
     const result = await firebase.auth().getUserByEmail(email);
     console.log(result, "from the check existing service");
     return "email already in use";
   } catch (error) {
+    if (error.phone) {
+      try {
+        const result = await firebase.auth().getUserByPhoneNumber(error.phone);
+        console.log(result, "from new thrown error");
+        return result;
+      } catch (error) {
+        return true;
+      }
+    }
     if (error.errorInfo.code === "auth/user-not-found") {
       try {
         const result = await firebase.auth().getUserByPhoneNumber(phone);
