@@ -30,7 +30,7 @@ const bodyParser = require("body-parser");
   // and our expressMiddleware function.
   app.use(
     "/",
-    cors({ origin: "http://localhost:3000", credentials: true }),
+    cors({ origin: "https://ct-demo-eta.vercel.app", credentials: true }),
 
     bodyParser.json(),
     // expressMiddleware accepts the same arguments:
