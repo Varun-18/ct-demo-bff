@@ -62,7 +62,7 @@ const userResolver = {
       try {
         const { accessToken } = args.data;
         const { email, phone_number } = await verifyUserService(accessToken);
-        
+
         const final = await createUserOnCT(email, phone_number);
         return final;
       } catch (error) {
@@ -92,7 +92,11 @@ const userResolver = {
             disableRefreshToken: false,
           }
         );
-        res.cookie("authToken", access_token, { httpOnly: true, sameSite:"None" });
+        res.cookie("authToken", access_token, {
+          httpOnly: true,
+          sameSite: "None",
+          secure: true,
+        });
         return { email, phone: phone_number };
       } catch (error) {
         console.log(error);
