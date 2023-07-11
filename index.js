@@ -9,6 +9,7 @@ const { resolvers } = require("./src/schema/resolvers/index");
 const express = require("express");
 const http = require("http");
 const bodyParser = require("body-parser");
+const { Process } = require("@commercetools/sdk-client-v2");
 
 (async () => {
   const server = new ApolloServer({
@@ -30,7 +31,7 @@ const bodyParser = require("body-parser");
   // and our expressMiddleware function.
   app.use(
     "/",
-    cors({ origin: "https://ct-demo-eta.vercel.app", credentials: true }),
+    cors({ origin: process.env.CORS_URL, credentials: true }),
 
     bodyParser.json(),
     // expressMiddleware accepts the same arguments:

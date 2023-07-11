@@ -3,6 +3,24 @@ const apiRoot = require("../config");
 // const { } = require("firebase-admin/auth")
 
 /**
+ * This service checks the number of users of a particular email id
+ * @param {string} email this is the email id for which we're going to check on firebase
+ * @returns
+ */
+
+const getUserCount = async (email, uid) => {
+  try {
+    const data = await firebase.auth().getUserByEmail(email);
+    return data.uid;
+  } catch (error) {
+    await firebase.auth().updateUser(uid, {
+      email: email,
+    });
+    console.log(error, "from get get userCount");
+  }
+};
+
+/**
  * This service verifies the token for 2 factor authentication
  * @param {String} token the access token which were are going to verify
  * @returns weather the token is valid or not
@@ -14,6 +32,35 @@ const verifyUserService = async (token) => {
     return { email, phone_number };
   } catch (error) {
     console.log(error, "user token verification service");
+  }
+};
+
+/**
+ * This service verifies the token for 2 factor authentication of Socials
+ * @param {String} token the access token which were are going to verify
+ * @returns weather the token is valid or not
+ */
+
+const verifySocialUserService = async (token) => {
+  try {
+    const { uid } = await firebase.auth().verifyIdToken(token);
+    // return { email, phone_number };
+    // const { providerData } = await firebase.auth().getUser(uid);
+    const data = await firebase.auth().getUser(uid);
+    console.log(data, "from verifiySocial service");
+    return { uid, providerData: data.providerData };
+  } catch (error) {
+    console.log(error, "user token verification service");
+  }
+};
+
+const deleteDuplicateUser = async (uid) => {
+  try {
+    await firebase.auth().deleteUser(uid);
+    console.log("delted user with uid", uid);
+    return true;
+  } catch (error) {
+    console.log(error, "error in deleting user");
   }
 };
 
@@ -54,6 +101,9 @@ const checkExistingService = async (email, phone) => {
       } catch (error) {
         console.log(error.errorInfo, "2nd catch block ");
         if (error.errorInfo.code === "auth/user-not-found") {
+          console.log(email, "hello world");
+          // const result = await firebase.auth().;
+          // console.log(result);
           return true;
         }
       }
@@ -91,12 +141,15 @@ const createUserOnCT = async (email, phone) => {
       .execute();
     return data;
   } catch (error) {
-    console.log(error);
+    console.log(error, "from create user on CT service");
   }
 };
 
 module.exports = {
   verifyUserService,
+  verifySocialUserService,
+  getUserCount,
+  deleteDuplicateUser,
   checkExistingService,
   createUserOnCT,
 };

@@ -2,6 +2,9 @@ const {
   verifyUserService,
   checkExistingService,
   createUserOnCT,
+  verifySocialUserService,
+  getUserCount,
+  deleteDuplicateUser,
 } = require("../../services/user.service");
 const authClient = require("../../authClient.config");
 
@@ -25,6 +28,10 @@ const userResolver = {
         const { email, phone } = args.data;
         console.log(email, phone);
         const result = await checkExistingService(email, phone);
+        console.log(result, "from check user");
+        if (result === undefined) {
+          return true
+        }
         return result;
       } catch (error) {
         console.log(error, "from the verfication of hte user");
@@ -38,13 +45,29 @@ const userResolver = {
      * @returns confirmation upon adding the user
      */
 
-    addUser: async (parent, args) => {
+    addUser: async (parent, args, { res }) => {
       try {
         const { stsTokenManager } = args.data;
         const { email, phone_number } = await verifyUserService(
           stsTokenManager.accessToken
         );
         const final = await createUserOnCT(email, phone_number);
+        const { access_token } = await authClient.customerPasswordFlow(
+          {
+            username: email,
+            password: email,
+          },
+          {
+            disableRefreshToken: false,
+          }
+        );
+
+        res.cookie("authToken", access_token, {
+          httpOnly: true,
+          sameSite: "None",
+          secure: true,
+        });
+
         return final;
       } catch (error) {
         console.log(error, "from add User mutaion ");
@@ -58,13 +81,49 @@ const userResolver = {
      * @returns confirmation upon adding the user
      */
 
-    addSocialsUser: async (parent, args) => {
+    addSocialsUser: async (parent, args, { res }) => {
       try {
-        const { accessToken } = args.data;
-        const { email, phone_number } = await verifyUserService(accessToken);
+        const { stsTokenManager } = args.data;
+        const { uid, providerData } = await verifySocialUserService(
+          stsTokenManager.accessToken
+        );
+        const { email } = providerData[0];
+        const id = await getUserCount(email, uid);
+        console.log(id, "*** from socials signup ***", " uid ", uid);
 
-        const final = await createUserOnCT(email, phone_number);
-        return final;
+        if (id === uid || id === undefined) {
+          console.log("unique user", id === uid);
+
+          if (id === undefined) {
+            await createUserOnCT(email);
+          }
+
+          const { access_token } = await authClient.customerPasswordFlow(
+            {
+              username: email,
+              password: email,
+            },
+            {
+              disableRefreshToken: false,
+            }
+          );
+
+          res.cookie("authToken", access_token, {
+            httpOnly: true,
+            sameSite: "None",
+            secure: true,
+          });
+
+          return { email };
+        } else {
+          console.log("duplicate user");
+          await deleteDuplicateUser(uid);
+          return {
+            status: 400,
+            message:
+              "user with this email already exits please choose another account..!!!",
+          };
+        }
       } catch (error) {
         console.log(error, "from add Socials User mutaion ");
       }
@@ -99,7 +158,7 @@ const userResolver = {
         });
         return { email, phone: phone_number };
       } catch (error) {
-        console.log(error);
+        console.log(error, "*** from login user mutaiton resolver ***");
       }
     },
   },
