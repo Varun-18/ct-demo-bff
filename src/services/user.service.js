@@ -44,10 +44,7 @@ const verifyUserService = async (token) => {
 const verifySocialUserService = async (token) => {
   try {
     const { uid } = await firebase.auth().verifyIdToken(token);
-    // return { email, phone_number };
-    // const { providerData } = await firebase.auth().getUser(uid);
     const data = await firebase.auth().getUser(uid);
-    console.log(data, "from verifiySocial service");
     return { uid, providerData: data.providerData };
   } catch (error) {
     console.log(error, "user token verification service");
@@ -57,7 +54,6 @@ const verifySocialUserService = async (token) => {
 const deleteDuplicateUser = async (uid) => {
   try {
     await firebase.auth().deleteUser(uid);
-    console.log("delted user with uid", uid);
     return true;
   } catch (error) {
     console.log(error, "error in deleting user");
@@ -118,7 +114,7 @@ const checkExistingService = async (email, phone) => {
  * @returns it confirms that the user is added to the commerce tools DB
  */
 
-const createUserOnCT = async (email, phone) => {
+const createUserOnCT = async (email, password, phone) => {
   try {
     const data = await apiRoot
       .me()
@@ -126,7 +122,7 @@ const createUserOnCT = async (email, phone) => {
       .post({
         body: {
           email,
-          password: email,
+          password,
           custom: {
             type: {
               key: "phone-number",

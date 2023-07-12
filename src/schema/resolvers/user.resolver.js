@@ -6,7 +6,12 @@ const {
   getUserCount,
   deleteDuplicateUser,
 } = require("../../services/user.service");
+
 const authClient = require("../../authClient.config");
+
+const brcypt = require("bcrypt");
+
+const salt = process.env.SALT;
 
 /**
  * This is a resolver that peforms the user related logic
@@ -26,11 +31,9 @@ const userResolver = {
     checkUser: async (parents, args) => {
       try {
         const { email, phone } = args.data;
-        console.log(email, phone);
         const result = await checkExistingService(email, phone);
-        console.log(result, "from check user");
         if (result === undefined) {
-          return true
+          return true;
         }
         return result;
       } catch (error) {
@@ -51,11 +54,18 @@ const userResolver = {
         const { email, phone_number } = await verifyUserService(
           stsTokenManager.accessToken
         );
-        const final = await createUserOnCT(email, phone_number);
+
+        const hash = await brcypt.hash(email, `${process.env.SALT}`);
+        console.log(
+          hash,
+          "***************************HASH****************************"
+        );
+
+        const final = await createUserOnCT(email, hash, phone_number);
         const { access_token } = await authClient.customerPasswordFlow(
           {
             username: email,
-            password: email,
+            password: hash,
           },
           {
             disableRefreshToken: false,
@@ -92,16 +102,19 @@ const userResolver = {
         console.log(id, "*** from socials signup ***", " uid ", uid);
 
         if (id === uid || id === undefined) {
-          console.log("unique user", id === uid);
-
+          const hash = await brcypt.hash(email, `${process.env.SALT}`);
+          console.log(
+            hash,
+            "***************************HASH****************************"
+          );
           if (id === undefined) {
-            await createUserOnCT(email);
+            await createUserOnCT(email, hash);
           }
 
           const { access_token } = await authClient.customerPasswordFlow(
             {
               username: email,
-              password: email,
+              password: hash,
             },
             {
               disableRefreshToken: false,
@@ -116,7 +129,6 @@ const userResolver = {
 
           return { email };
         } else {
-          console.log("duplicate user");
           await deleteDuplicateUser(uid);
           return {
             status: 400,
@@ -142,10 +154,16 @@ const userResolver = {
       try {
         const { token } = args.data;
         const { email, phone_number } = await verifyUserService(token);
+
+        const hash = await brcypt.hash(email, `${process.env.SALT}`);
+        console.log(
+          hash,
+          "***************************HASH****************************"
+        );
         const { access_token } = await authClient.customerPasswordFlow(
           {
             username: email,
-            password: email,
+            password: hash,
           },
           {
             disableRefreshToken: false,
