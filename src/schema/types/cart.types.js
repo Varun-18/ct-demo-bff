@@ -17,7 +17,10 @@ const cart = `#graphql
 
     type Mutation {    
     addToCart(data: JSON) : JSON
-
+    addCustomerEmail(data: JSON) : JSON
+    addShippingAddress(data: JSON): JSON
+    addShippingMethod(data: JSON): JSON
+    addBillingAddress(data: JSON): JSON
     }
 `;
 

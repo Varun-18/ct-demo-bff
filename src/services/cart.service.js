@@ -1,23 +1,4 @@
 const apiRoot = require("../config");
-const { v4: uuidv4 } = require("uuid");
-/**
- * This service creates a cart for the guest user
- * @returns the deatils of the cart that was created
- */
-
-const createCartService = async () => {
-  try {
-    const anonymousId = uuidv4();
-    const { body } = await apiRoot
-      .carts()
-      .post({ body: { currency: "EUR", anonymousId } })
-      .execute();
-    console.log(body);
-    return body;
-  } catch (error) {
-    console.log(error, "from create cart service");
-  }
-};
 
 /**
  * This functions adds the line-items to the cart based on the current cart version
@@ -30,32 +11,224 @@ const createCartService = async () => {
 const addLineItem = async (cartVersion, cartID, prodID) => {
   try {
     console.log(cartID, prodID, "from the add lineItem service");
+    if (!cartID) {
+      const { body } = await apiRoot
+        .carts()
+        .post({
+          body: {
+            currency: "EUR",
+            lineItems: [{ productId: prodID, variantId: 1 }],
+          },
+        })
+        .execute();
+      console.log(body);
+      return body;
+    } else {
+      const { body } = await apiRoot
+        .carts()
+        .withId({ ID: cartID })
+        .post({
+          body: {
+            version: cartVersion ? parseInt(cartVersion) : 1,
+            actions: [
+              {
+                action: "addLineItem",
+                productId: prodID,
+                variantId: 1,
+                // quantity: 1,
+              },
+            ],
+          },
+        })
+        .execute();
 
-    const { body } = await apiRoot
-      .carts()
-      .withId({ ID: cartID })
-      .post({
-        body: {
-          version: cartVersion ? parseInt(cartVersion) : 1,
-          actions: [
-            {
-              action: "addLineItem",
-              productId: prodID,
-              variantId: 1,
-              // quantity: 1,
-            },
-          ],
-        },
-      })
-      .execute();
-
-    return body;
+      return body;
+    }
   } catch (error) {
     console.log(error, "from the addLine Item service");
   }
 };
 
+/**
+ * This service is used to addd email of the user
+ * @returns the added email of the user
+ */
+
+const addCustomerEmailService = async (cartVersion, cartID, email) => {
+  try {
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [{ action: "setCustomerEmail", email }],
+        },
+      })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, " from the add cusotmer email service");
+  }
+};
+
+/**
+ * This service is used to enter the shipping address of the user
+ * @param {string} cartVersion the currents verrson of hte cart
+ * @param {string} cartID the id of the cart to which we wan to add the shiping address
+ * @param {string} firstname first name of the user
+ * @param {*} lastname lastname of the user
+ * @param {*} address address of the user
+ * @param {*} country the country of the user
+ * @param {*} city the city of delivery
+ * @param {*} zipCode the postalCode of the the city
+ * @param {*} phone the phone no of the recipient
+ * @returns adds the shipping address of the user
+ */
+
+const setShippingAddressService = async (
+  cartVersion,
+  cartID,
+  firstname,
+  lastname,
+  address,
+  country,
+  city,
+  zipCode,
+  phone
+) => {
+  try {
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [
+            {
+              action: "setShippingAddress",
+              address: {
+                country,
+                firstName: firstname,
+                lastName: lastname,
+                additionalStreetInfo: address,
+                city,
+                phone,
+                postalCode: zipCode,
+              },
+            },
+          ],
+        },
+      })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, "from the add shipping address service");
+  }
+};
+
+const setShippingMethodService = async (cartVersion, cartID, id) => {
+  try {
+    console.log(cartVersion, cartID, id);
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [
+            {
+              action: "setShippingMethod",
+              shippingMethod: {
+                id,
+                typeId: "shipping-method",
+              },
+            },
+          ],
+        },
+      })
+      .execute();
+    console.log(body);
+
+    return body;
+  } catch (error) {
+    console.log(error, "from the set shipping method service");
+  }
+};
+
+/**
+ * This service is used to enter the billing address of the user
+ * @param {string} cartVersion the currents verrson of hte cart
+ * @param {string} cartID the id of the cart to which we wan to add the billing address
+ * @param {string} firstname first name of the user
+ * @param {*} lastname lastname of the user
+ * @param {*} address address of the user
+ * @param {*} country the country of the user
+ * @param {*} city the city of delivery
+ * @param {*} zipCode the postalCode of the the city
+ * @param {*} phone the phone no of the recipient
+ * @returns adds the billing address of the user
+ */
+
+const setBillingAddressService = async (
+  cartVersion,
+  cartID,
+  firstname,
+  lastname,
+  address,
+  country,
+  city,
+  zipCode,
+  phone
+) => {
+  try {
+    console.log(
+      cartVersion,
+      cartID,
+      firstname,
+      lastname,
+      address,
+      country,
+      city,
+      zipCode,
+      phone
+    );
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [
+            {
+              action: "setBillingAddress",
+              address: {
+                country,
+                firstName: firstname,
+                lastName: lastname,
+                additionalStreetInfo: address,
+                city,
+                phone,
+                postalCode: zipCode,
+              },
+            },
+          ],
+        },
+      })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, "from the setBillingAddressService service");
+  }
+};
+
 module.exports = {
-  createCartService,
   addLineItem,
+  addCustomerEmailService,
+  setShippingAddressService,
+  setShippingMethodService,
+  setBillingAddressService,
 };

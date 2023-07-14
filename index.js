@@ -10,7 +10,6 @@ const express = require("express");
 const http = require("http");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const { Process } = require("@commercetools/sdk-client-v2");
 
 dotenv.config();
 
