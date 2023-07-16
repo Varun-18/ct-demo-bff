@@ -4,6 +4,8 @@ const {
   setShippingAddressService,
   setShippingMethodService,
   setBillingAddressService,
+  addPaymentMethod,
+  convertCartToOrder,
 } = require("../../services/cart.service");
 
 const cartResolver = {
@@ -31,12 +33,16 @@ const cartResolver = {
   addCustomerEmail: async (parent, args, { res }) => {
     try {
       const { cartVersion, cartID, email } = args.data;
-      const { id, version, customerEmail } = await addCustomerEmailService(
-        cartVersion,
-        cartID,
-        email
-      );
-      return { id, version, customerEmail };
+      if (!cartID && !cartVersion) {
+        return { code: 404, message: "Please create a cart first " };
+      } else {
+        const { id, version, customerEmail } = await addCustomerEmailService(
+          cartVersion,
+          cartID,
+          email
+        );
+        return { id, version, customerEmail };
+      }
     } catch (error) {
       console.log(error, "form the add email to cart resolver");
     }
@@ -127,6 +133,25 @@ const cartResolver = {
       return { id, version, billingAddress };
     } catch (error) {
       console.log(error, "from billing address resolvers");
+    }
+  },
+  addPaymentMethod: async (parent, args) => {
+    try {
+      const { cartVersion, cartID, id } = args.data;
+      const result = await addPaymentMethod(cartID, cartVersion, id);
+      return result;
+    } catch (error) {
+      console.log(error, "from the add Payment method resolver");
+    }
+  },
+
+  convertCartToOrder: async (parent, args) => {
+    try {
+      const { cartID, cartVersion } = args.data;
+      const { id } = await convertCartToOrder(cartID, cartVersion);
+      return id;
+    } catch (error) {
+      console.log(error, "form the convert cart to order resolver");
     }
   },
 };

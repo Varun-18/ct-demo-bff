@@ -1,4 +1,5 @@
 const apiRoot = require("../config");
+const { v4: uuidv4 } = require("uuid");
 
 /**
  * This functions adds the line-items to the cart based on the current cart version
@@ -225,10 +226,59 @@ const setBillingAddressService = async (
   }
 };
 
+/**
+ *
+ */
+
+const addPaymentMethod = async (cartID, cartVersion, id) => {
+  try {
+    console.log(cartID, cartVersion, id);
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [
+            { action: "addPayment", payment: { id, typeId: "payment" } },
+          ],
+        },
+      })
+      .execute();
+
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, "form the addPaymentMethod service ");
+  }
+};
+
+const convertCartToOrder = async (cartID, cartVersion) => {
+  try {
+    const uuid = uuidv4();
+    const { body } = await apiRoot
+      .orders()
+      .post({
+        body: {
+          cart: { id: cartID, typeId: "cart" },
+          version: parseInt(cartVersion),
+          orderNumber: uuid,
+        },
+      })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error.body, "from the converCartTo Order service");
+  }
+};
+
 module.exports = {
   addLineItem,
   addCustomerEmailService,
   setShippingAddressService,
   setShippingMethodService,
   setBillingAddressService,
+  addPaymentMethod,
+  convertCartToOrder,
 };

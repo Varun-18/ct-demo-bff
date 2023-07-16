@@ -21,6 +21,8 @@ const cart = `#graphql
     addShippingAddress(data: JSON): JSON
     addShippingMethod(data: JSON): JSON
     addBillingAddress(data: JSON): JSON
+    addPaymentMethod(data: JSON): JSON
+    convertCartToOrder(data: JSON): JSON
     }
 `;
 
