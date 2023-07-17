@@ -6,6 +6,7 @@ const {
   setBillingAddressService,
   addPaymentMethod,
   convertCartToOrder,
+  removeLineItemService,
 } = require("../../services/cart.service");
 
 const cartResolver = {
@@ -152,6 +153,16 @@ const cartResolver = {
       return id;
     } catch (error) {
       console.log(error, "form the convert cart to order resolver");
+    }
+  },
+
+  removeLineItem: async (parent, args) => {
+    try {
+      const { cartID, cartVersion, lineItem } = args.data;
+      const data = await removeLineItemService(cartID, cartVersion, lineItem);
+      return data;
+    } catch (error) {
+      console.log(error, "from the remove line item service");
     }
   },
 };

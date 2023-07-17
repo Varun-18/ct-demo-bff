@@ -273,6 +273,44 @@ const convertCartToOrder = async (cartID, cartVersion) => {
   }
 };
 
+const getCartService = async (cartID) => {
+  try {
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .get()
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, "from the get cart service");
+  }
+};
+
+const removeLineItemService = async (cartID, cartVersion, lineItem) => {
+  try {
+    const { body } = await apiRoot
+      .carts()
+      .withId({ ID: cartID })
+      .post({
+        body: {
+          version: parseInt(cartVersion),
+          actions: [
+            {
+              action: "removeLineItem",
+              lineItemId: lineItem,
+            },
+          ],
+        },
+      })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error, "from the remove line item service");
+  }
+};
+
 module.exports = {
   addLineItem,
   addCustomerEmailService,
@@ -281,4 +319,6 @@ module.exports = {
   setBillingAddressService,
   addPaymentMethod,
   convertCartToOrder,
+  getCartService,
+  removeLineItemService,
 };

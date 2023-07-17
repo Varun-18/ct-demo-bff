@@ -141,6 +141,53 @@ const createUserOnCT = async (email, password, phone) => {
   }
 };
 
+const verfiyTokenService = async (token) => {
+  try {
+    const { body } = await apiRoot
+      .me()
+      .get({ headers: { Authorization: `Bearer ${token}` } })
+      .execute();
+    console.log(body);
+    return body;
+  } catch (error) {
+    console.log(error.errors);
+  }
+};
+
+const randomOrders = async (id, email) => {
+  try {
+    const { body } = await apiRoot
+      .orders()
+      .get({ queryArgs: { where: `customerEmail="${email}"` } })
+      .execute();
+    // console.log(body);
+
+    const data = await Promise.all(
+      body.results.map(async (item) => {
+        await apiRoot
+          .orders()
+          .withId({ ID: item.id })
+          .post({
+            body: {
+              version: parseInt(item.version),
+              actions: [{ action: "setCustomerId", customerId: id }],
+            },
+          })
+          .execute();
+
+        return item;
+      })
+    );
+
+    // const newData = await data();
+
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.log(error, "from the fetch random orders");
+  }
+};
+
 module.exports = {
   verifyUserService,
   verifySocialUserService,
@@ -148,4 +195,6 @@ module.exports = {
   deleteDuplicateUser,
   checkExistingService,
   createUserOnCT,
+  verfiyTokenService,
+  randomOrders,
 };

@@ -1,18 +1,36 @@
 const cart = `#graphql
     scalar JSON
 
-    type lineItems {
+    type Cart { 
+    id: ID
+    version: Int
+    lineItems: [Lineitem]
+    totalPrice: priceValue
+    taxedPrice: taxedPrice
+    shippingAddress: JSON
+    shippingInfo: JSON
+    billingAddress: JSON
+    customerEmail: JSON
+    }
+
+    type Lineitem {
         id: ID
         productId: ID
-        name: Name
+        name: locale
+        variant: masterVariant
+        price: [price]
+        quantity: Int
+        totalPrice:priceValue 
     }
 
-    type Name{
-    en: String 
+    type taxedPrice {
+        totalTax: priceValue
+        totalNet: priceValue
     }
+
 
     type Query {
-        getLineItems (cartID: ID): [lineItems]
+        getCart (cartID: ID): Cart 
     }
 
     type Mutation {    
@@ -23,6 +41,7 @@ const cart = `#graphql
     addBillingAddress(data: JSON): JSON
     addPaymentMethod(data: JSON): JSON
     convertCartToOrder(data: JSON): JSON
+    removeLineItem(data: JSON): JSON
     }
 `;
 
