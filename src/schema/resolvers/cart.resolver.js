@@ -1,3 +1,7 @@
+const { transporter } = require("../../nodeMailer.config");
+
+const bcrypt = require("bcrypt");
+
 const {
   addLineItem,
   addCustomerEmailService,
@@ -42,6 +46,34 @@ const cartResolver = {
           cartID,
           email
         );
+        const hashedMail = await bcrypt.hash(
+          customerEmail,
+          `${process.env.SALT}`
+        );
+
+        const mailOptions = {
+          from: "mernhub@gmail.com",
+          to: `${customerEmail}`,
+          subject: "Email verification form xyz website",
+          text: `This is the email verification link for your xyz website  ${
+            process.env.FRONTEND_ORIGIN +
+            "/checkout?cred=" +
+            hashedMail +
+            "&cart=" +
+            id +
+            "&version=" +
+            version
+          }`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log("Error occurred:", error);
+          } else {
+            console.log("Email sent:", info.response);
+          }
+        });
+
         return { id, version, customerEmail };
       }
     } catch (error) {
@@ -163,6 +195,14 @@ const cartResolver = {
       return data;
     } catch (error) {
       console.log(error, "from the remove line item service");
+    }
+  },
+  verifyCustomerEmail: async (parent, args) => {
+    try {
+      console.log(args);
+      return "ok";
+    } catch (error) {
+      console.log(error, "form the verifyCustomerEmail resolver");
     }
   },
 };
